@@ -1,0 +1,7 @@
+name: climbingwall
+channels:
+  - dlr-sc
+dependencies:
+  - python
+  - pip
+  - pythonocc-core
