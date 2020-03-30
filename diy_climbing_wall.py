@@ -9,8 +9,6 @@ from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform, BRepBuilderAPI_Mak
 from OCC.Core.BRepFeat import BRepFeat_MakeCylindricalHole
 from OCC.Core.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Vec, gp_XYZ, gp_Pln
 
-from copy import copy as shallow_copy
-from copy import deepcopy
 from math import radians, sin, cos
 
 
@@ -45,8 +43,8 @@ class Part:
             ori = [0, 0, 0]
         if pos is None:
             pos = [0, 0, 0]
-        self._position = deepcopy(pos)
-        self._orientation = deepcopy(ori)
+        self._position = pos
+        self._orientation = ori
         self._parent = parent
         self._shape = None
         self._trans = None
