@@ -3,14 +3,15 @@
 
 from OCC.Display.SimpleGui import init_display
 
-from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeBox
-from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform
+from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeHalfSpace
+from OCC.Core.BRepAlgoAPI import BRepAlgoAPI_Cut
+from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform, BRepBuilderAPI_MakeFace
 from OCC.Core.BRepFeat import BRepFeat_MakeCylindricalHole
-from OCC.Core.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Vec, gp_XYZ
+from OCC.Core.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Vec, gp_XYZ, gp_Pln
 
 from copy import copy as shallow_copy
 from copy import deepcopy
-from math import radians, sin, cos, tan
+from math import radians, sin, cos
 
 
 def euler_to_gp_trsf(euler_zxz=None, unit="deg"):
@@ -37,34 +38,6 @@ def euler_to_gp_trsf(euler_zxz=None, unit="deg"):
     return trns*trns_next
 
 
-def translate_part(part, vec):
-
-    ret = shallow_copy(part)
-    ret._position = deepcopy(part._position)
-    ret._orientation = deepcopy(part._orientation)
-    ret._parent = part
-
-    if part._parent is not None:
-        # TODO: Only transform rotation part
-        trans = part._parent._shape.Location().Transformation()
-        xyz = gp_XYZ(vec.X(), vec.Y(), vec.Z())
-        trans.Transforms(xyz)
-        mvec = gp_Vec(xyz.X(), xyz.Y(), xyz.Z())
-    else:
-        mvec = vec
-
-    trns = gp_Trsf()
-    trns.SetTranslation(mvec)
-    brep_trns = BRepBuilderAPI_Transform(part._shape, trns, False)
-    brep_trns.Build()
-
-    ret._position[0] = vec.X()
-    ret._position[1] = vec.Y()
-    ret._position[2] = vec.Z()
-    ret._shape = brep_trns.Shape()
-    return ret   
-
-
 class Part:
 
     def __init__(self, pos=None, ori=None, parent=None):
@@ -76,13 +49,14 @@ class Part:
         self._orientation = deepcopy(ori)
         self._parent = parent
         self._shape = None
+        self._trans = None
 
     def place(self):
 
         assert(self._shape is not None)
 
         if self._parent is not None:
-            trans = self._parent._shape.Location().Transformation()
+            trans = self._parent._trans
         else:
             trans = gp_Trsf()
 
@@ -95,6 +69,7 @@ class Part:
 
         brep_trns = BRepBuilderAPI_Transform(self._shape, trans, False)
         brep_trns.Build()
+        self._trans = trans
         self._shape = brep_trns.Shape()
 
     @property
@@ -102,10 +77,7 @@ class Part:
         """
         returns the position in global coordinates
         """
-        if self._parent is not None:
-            return [self._position[i] + self._parent.position[i] for i in range(0, 3)]
-        else:
-            return deepcopy(self._position)
+        return self._position
 
     @position.setter
     def position(self, value):
@@ -131,8 +103,8 @@ class Bar(Part):
                  pos=None,
                  ori=None,
                  parent=None,
-                 length=2000, 
-                 section=(80, 100)):
+                 length=2000.,
+                 section=(80., 100.)):
 
         super().__init__(pos, ori, parent)
         self._length = length
@@ -148,9 +120,9 @@ class Panel(Part):
                  pos=None,
                  ori=None,
                  parent=None,
-                 width=1000, 
-                 height=2400,
-                 thickness=21,
+                 width=1000.,
+                 height=2400.,
+                 thickness=21.,
                  holes=None):
         super().__init__(pos, ori, parent)
         if holes is None:
@@ -182,36 +154,61 @@ class Panel(Part):
         self.place()
 
 
-def climbing_wall():
+def climbing_wall(wall_width=2000.,
+                  wall_height=2400.,
+                  wall_thickness=21.,
+                  wall_angle=25.,
+                  gap=100.,
+                  safety=500.,
+                  holes=None):
+    """
+    create a free standing climbing wall
 
+    :param wall_width: the width of the climbable surface
+    :param wall_height: the height of the climbable surface
+    :param wall_thickness: the thickness of the plywood
+    :param wall_angle: the angle of overhang
+    :param gap: the desired gap between the top part of
+           the climbable surface and the horizontal top bar
+    :param safety: extra length of the left and right floor
+           bars to prevent tilting
+    :param holes: the holes dict for defining the panels
+           of the climbable surface
+
+    :return: a list of parts that make up the climbing wall
+    """
+    if holes is None:
+        holes = {'x_start': 100.,
+                 'x_dist': 200.,
+                 'y_start': 100.,
+                 'y_dist': 200.,
+                 'diameter': 13.}
+
+    # cross section of the bars for the rear construction
     bar_width = 100
     bar_height = 80
     bar_section = (bar_width, bar_height)
-    
-    wall_width = 2000
-    wall_height = 2400
-    wall_thickness = 21
-    wall_angle = 25
-    holes = {'x_start': 100,
-             'x_dist': 200,
-             'y_start': 100,
-             'y_dist': 200,
-             'diameter': 13}
-
 
     parts =[]
 
+    # some auxiliary variables
+    ra = radians(wall_angle)
+    sina = sin(ra)
+    cosa = cos(ra)
+    tana = sina/cosa
+
     # create horizontal bar on the left side
+    l = bar_width + (wall_height + gap) * sina + safety
     horizontal_left = Bar(pos=[0, 0, 0],
                           ori=[0, 0, -90],
-                          length=2000,
+                          length=l,
                           section=bar_section)
     parts.append(horizontal_left)
 
     # create horizontal bar on the right side
     horizontal_right = Bar(pos=[wall_width + horizontal_left._section[0], 0, 0],
                            ori=[0, 0, -90],
-                           length=2000,
+                           length=l,
                            section=bar_section)
     parts.append(horizontal_right)
 
@@ -223,30 +220,46 @@ def climbing_wall():
                section=bar_section)
     parts.append(back)
 
-    # create three diagonal spars
-    sina = sin(radians(wall_angle))
-    cosa = cos(radians(wall_angle))
-    diag1 = Bar(pos=[horizontal_left._section[0], -2*bar_width + 2*back._section[0]/cosa, back._section[1]*sina],
+
+    # create the three diagonal bars
+    dz = back._section[1] - back._section[0] * sina
+    dy = back._section[0] * sina * tana
+    l = wall_height + 2*bar_width/tana + gap
+    diag1 = Bar(pos=[horizontal_left._section[0], dy, dz],
                 ori=[-90, wall_angle-90, 0],
                 parent=back,
-                length=wall_height,
+                length=l,
                 section=(bar_height, bar_width))
     parts.append(diag1)
 
     diag2 = Bar(pos=[0, (wall_width - horizontal_left._section[1])/2, 0],
                 parent=diag1,
-                length=wall_height,
+                length=l,
                 section=(bar_height, bar_width))
     parts.append(diag2)
 
     diag3 = Bar(pos=[0, (wall_width - horizontal_left._section[1]) / 2, 0],
                 parent=diag2,
-                length=wall_height,
+                length=l,
                 section=(bar_height, bar_width))
     parts.append(diag3)
 
+    # cut diagonal bars at plane parallel to xy
+    pnt = gp_Pnt(0, 0, 2 * bar_height)
+    pln = gp_Pln(pnt, gp_Dir(0, 0, 1))
+    face = BRepBuilderAPI_MakeFace(pln).Shape()
+    tool1 = BRepPrimAPI_MakeHalfSpace(face, gp_Pnt(0, 0, 0)).Solid()
+
+    # cut diagonal bars at plane parallel to xz
+    pnt = gp_Pnt(0, -bar_width - (wall_height + gap)*sina, 0)
+    pln = gp_Pln(pnt, gp_Dir(0, 1, 0))
+    face = BRepBuilderAPI_MakeFace(pln).Shape()
+    tool2 = BRepPrimAPI_MakeHalfSpace(face, gp_Pnt(0, pnt.Y()-1, 0)).Solid()
+    for bar in [diag1, diag2, diag3]:
+        bar._shape = BRepAlgoAPI_Cut(bar._shape, tool1).Shape()
+        bar._shape = BRepAlgoAPI_Cut(bar._shape, tool2).Shape()
+
     # add the climbing panels
-    tana = tan(radians(wall_angle))
     panel_lo = Panel(pos=[tana*diag1._section[1], 0, -wall_thickness],
                      parent=diag1,
                      width=wall_width,
@@ -263,15 +276,63 @@ def climbing_wall():
                      holes=holes)
     parts.append(panel_lo)
 
+    # add vertical bars
+    front_section = (100, 100)
+    dx = 2 * bar_width + (wall_height + gap) * sina
+    dz = bar_height
+    l = (wall_height + gap) * cosa + bar_height
+    vertical_left = Bar(pos=[dx, 0, dz],
+                        ori=[90, 90, -90],
+                        length=l,
+                        parent=horizontal_left,
+                        section=front_section)
+    parts.append(vertical_left)
+
+    vertical_right = Bar(pos=[dx, 0, dz],
+                         ori=[90, 90, -90],
+                         length=l,
+                         parent=horizontal_right,
+                         section=front_section)
+    parts.append(vertical_right)
+
+    dx = bar_height + front_section[0] + (wall_height + gap) * cosa
+    top = Bar(pos=[dx, 0, 0],
+              ori=[90, 0, 0],
+              length=wall_width + 2*bar_width,
+              parent=vertical_left,
+              section=front_section)
+    parts.append(top)
+
     return parts
 
 
 if __name__ == '__main__':
 
-    parts = climbing_wall()
+    wall = {'wall_width': 2000,
+            'wall_height': 2400,
+            'wall_thickness': 21,
+            'wall_angle': 25,
+            'gap': 100,
+            'safety': 500,
+            'holes': {
+                'x_start': 100.,
+                'x_dist': 200.,
+                'y_start': 100.,
+                'y_dist': 200.,
+                'diameter': 13.
+            }
+            }
+
+    parts = climbing_wall(**wall)
 
     display, start_display, add_menu, add_function_to_menu = init_display()
     for part in parts:
         display.DisplayShape(part._shape, update=False)
     display.FitAll()
     start_display()
+
+    #TO DO
+    # draw annotated bounding box
+    # pretty print needed material (e.g. 2x plywood 1200x1000x21, 8x bars 2000x ... )
+    # add GUI with pyqt
+    # export to step, stl
