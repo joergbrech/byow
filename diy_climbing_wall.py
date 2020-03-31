@@ -29,6 +29,8 @@ def climbing_wall(wall_width=2000.,
 
     :return: a list of parts that make up the climbing wall
     """
+
+    # holes definition used for the plywood panels
     if holes is None:
         holes = {'x_start': 100.,
                  'x_dist': 200.,
@@ -37,11 +39,9 @@ def climbing_wall(wall_width=2000.,
                  'diameter': 13.}
 
     # cross section of the bars for the rear construction
-    bar_width = 100
-    bar_height = 80
-    bar_section = (bar_width, bar_height)
-
-    parts =[]
+    # and for the front construction
+    back_section = (100, 80)
+    front_section = (100, 100)
 
     # some auxiliary variables
     ra = radians(wall_angle)
@@ -49,40 +49,42 @@ def climbing_wall(wall_width=2000.,
     cosa = cos(ra)
     tana = tan(ra)
 
+    parts = []
+
     # create horizontal bar on the left side
-    l = bar_width + (wall_height + gap) * sina + safety
+    l = back_section[0] + (wall_height + gap) * sina + safety
     horizontal_left = Bar(pos=[0, 0, 0],
                           ori=[0, 0, -90],
                           length=l,
-                          section=bar_section)
+                          section=back_section)
     parts.append(horizontal_left)
 
     # create horizontal bar on the right side
     horizontal_right = Bar(pos=[0, wall_width + horizontal_left._section[0], 0],
                            parent=horizontal_left,
                            length=l,
-                           section=bar_section)
+                           section=back_section)
     parts.append(horizontal_right)
 
     # create horizontal part in the lower back
-    back = Bar(pos=[horizontal_left._section[0], 0, bar_height],
+    back = Bar(pos=[horizontal_left._section[0], 0, back_section[1]],
                ori=[0, 0, 90],
                parent=horizontal_left,
                length=wall_width + 2*horizontal_left._section[0],
-               section=bar_section)
+               section=back_section)
     parts.append(back)
 
 
     # create the three diagonal bars
     dz = back._section[1] - back._section[0] * sina
     dy = back._section[0] * sina * tana
-    l = wall_height + bar_width*tana + bar_width*tan(radians(90-wall_angle)) + gap
+    l = wall_height + back_section[0]*tana + back_section[0]*tan(radians(90-wall_angle)) + gap
     kwargs = {
         'pos': [horizontal_left._section[0], dy, dz],
         'ori': [-90, wall_angle-90, 0],
         'parent': back,
         'length': l,
-        'section': (bar_height, bar_width),
+        'section': (back_section[1], back_section[0]),
         'saw_start': wall_angle-90,
         'saw_end': -wall_angle
     }
@@ -99,7 +101,6 @@ def climbing_wall(wall_width=2000.,
     kwargs['parent'] = diag2
     diag3 = Bar(**kwargs)
     parts.append(diag3)
-
 
     # add the climbing panels
     panel_lo = Panel(pos=[tana*diag1._section[1], 0, -wall_thickness],
@@ -119,10 +120,9 @@ def climbing_wall(wall_width=2000.,
     parts.append(panel_lo)
 
     # add vertical bars
-    front_section = (100, 100)
-    dx = 2 * bar_width + (wall_height + gap) * sina
-    dz = bar_height
-    l = (wall_height + gap) * cosa + bar_height
+    dx = 2 * back_section[0] + (wall_height + gap) * sina
+    dz = back_section[1]
+    l = (wall_height + gap) * cosa + back_section[1]
     vertical_left = Bar(pos=[dx, 0, dz],
                         ori=[90, 90, -90],
                         length=l,
@@ -137,10 +137,10 @@ def climbing_wall(wall_width=2000.,
                          section=front_section)
     parts.append(vertical_right)
 
-    dx = bar_height + front_section[0] + (wall_height + gap) * cosa
+    dx = back_section[1] + front_section[0] + (wall_height + gap) * cosa
     top = Bar(pos=[dx, 0, 0],
               ori=[90, 0, 0],
-              length=wall_width + 2*bar_width,
+              length=wall_width + 2*back_section[0],
               parent=vertical_left,
               section=front_section)
     parts.append(top)
