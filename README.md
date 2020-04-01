@@ -10,6 +10,6 @@ Install [Anaconda](https://docs.conda.io/en/latest/miniconda.html) and type
 
 ```buildoutcfg
 conda env create -f environment.yml
-conda activate climbingwall
+conda activate climbing-wall
 python diy_climbing_wall.py
 ```

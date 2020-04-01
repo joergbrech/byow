@@ -1,7 +1,9 @@
-name: climbingwall
+name: climbing-wall
 channels:
   - dlr-sc
 dependencies:
   - python
   - pip
   - pythonocc-core
+  - pip:
+    - PyQt5
