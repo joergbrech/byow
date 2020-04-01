@@ -11,5 +11,13 @@ Install [Anaconda](https://docs.conda.io/en/latest/miniconda.html) and type
 ```buildoutcfg
 conda env create -f environment.yml
 conda activate climbing-wall
-python diy_climbing_wall.py
+python gui.py
 ```
+
+## Whouldn't it have been easier to use *any* CAD system directly?
+
+:fu: Yes, I was bored, ok?
+
+## Contributing
+
+Give me carpentry advice or write a PR.

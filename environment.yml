@@ -7,3 +7,4 @@ dependencies:
   - pythonocc-core
   - pip:
     - PyQt5
+    - qdarkstyle
