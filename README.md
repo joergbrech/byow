@@ -16,7 +16,7 @@ python gui.py
 
 ## Whouldn't it have been easier to use *any* CAD system directly?
 
-:fu: Yes, I was bored, ok?
+:fu: I was bored, ok?
 
 ## Contributing
 

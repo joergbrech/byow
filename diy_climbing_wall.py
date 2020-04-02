@@ -186,7 +186,6 @@ if __name__ == '__main__':
     #   mount_lower = [side, top] (default for wall_angle >= 45: side, default for wall_angle < 45: top)
     #   overlap_upper = [+, -] (- means away from climber, - is default)
     #   overlap_lower = [+, -] (- means away from climber, - is default)
-    # draw annotated bounding box
     # pretty print needed material (e.g. 2x plywood 1200x1000x21, 8x bars 2000x ... )
-    # add GUI with pyqt
     # export to step, stl
+    # make conda package

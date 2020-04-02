@@ -11,6 +11,7 @@ load_any_qt_backend()
 QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
 from OCC.Display.qtDisplay import qtViewer3d
 
+from util import make_compound, get_boundingbox_shape, get_boundingbox
 
 class Controller(QtWidgets.QFrame):
 
@@ -82,7 +83,7 @@ class Controller(QtWidgets.QFrame):
         for i in range(0, len(self.keys) - 1):
             dict = app.wall[self.keys[i]]
         dict[self.keys[-1]] = self.dial.value()
-        app.viewer.needs_redraw=True
+        app.valid = False
 
 
 class ControllerTab(QtWidgets.QWidget):
@@ -103,21 +104,34 @@ class Viewer3d(qtViewer3d):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.needs_redraw = True
         self.InitDriver()
+        def FitAllDecorator(func):
+            def ret(*args, **kwargs):
+                r = func(*args, **kwargs)
+                self._display.FitAll()
+                return r
+            return ret
+        self._display.View_Top = FitAllDecorator(self._display.View_Top)
+        self._display.View_Bottom = FitAllDecorator(self._display.View_Bottom)
+        self._display.View_Left = FitAllDecorator(self._display.View_Left)
+        self._display.View_Right = FitAllDecorator(self._display.View_Right)
+        self._display.View_Front = FitAllDecorator(self._display.View_Front)
+        self._display.View_Rear = FitAllDecorator(self._display.View_Rear)
 
     def trigger_redraw(self):
-        if self.needs_redraw:
+        app = QtWidgets.QApplication.instance()
+        if not app.valid:
+            app.calc()
             self._redraw()
 
     def _redraw(self):
         app = QtWidgets.QApplication.instance()
         self._display.EraseAll()
-        parts = climbing_wall(**app.wall)
+        parts = app.wall_shape
         for part in parts:
             self._display.DisplayShape(part._shape, update=False)
+        self._display.DisplayShape(app.bb_shape, color='red', update=False)
         self._display.FitAll()
-        self.needs_redraw = False
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -140,10 +154,54 @@ class MainWindow(QtWidgets.QMainWindow):
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.layout.addWidget(self.splitter)
 
+        left = QtWidgets.QFrame()
+        left.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                           QtWidgets.QSizePolicy.Expanding)
+        self.splitter.addWidget(left)
+        left.setLayout(QtWidgets.QVBoxLayout())
+
         app = QtWidgets.QApplication.instance()
-        self.splitter.addWidget(app.viewer)
+        left.layout().addWidget(app.viewer)
+        app.viewer.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                 QtWidgets.QSizePolicy.Expanding)
+
+        bottom_buttons = QtWidgets.QFrame()
+        left.layout().addWidget(bottom_buttons)
+        bottom_buttons.setLayout(QtWidgets.QHBoxLayout())
+
+        button_fit = QtWidgets.QPushButton("Fit All", self)
+        button_fit.clicked.connect(lambda: app.viewer._display.FitAll())
+        bottom_buttons.layout().addWidget(button_fit)
+
+        button_top = QtWidgets.QPushButton("Top", self)
+        button_top.clicked.connect(lambda: app.viewer._display.View_Top())
+        bottom_buttons.layout().addWidget(button_top)
+
+        button_bottom = QtWidgets.QPushButton("Bottom", self)
+        button_bottom.clicked.connect(lambda: app.viewer._display.View_Bottom())
+        bottom_buttons.layout().addWidget(button_bottom)
+
+        button_left = QtWidgets.QPushButton("Left", self)
+        button_left.clicked.connect(lambda: app.viewer._display.View_Left())
+        bottom_buttons.layout().addWidget(button_left)
+
+        button_right = QtWidgets.QPushButton("Right", self)
+        button_right.clicked.connect(lambda: app.viewer._display.View_Right())
+        bottom_buttons.layout().addWidget(button_right)
+
+        button_front = QtWidgets.QPushButton("Front", self)
+        button_front.clicked.connect(lambda: app.viewer._display.View_Front())
+        bottom_buttons.layout().addWidget(button_front)
+
+        button_rear = QtWidgets.QPushButton("Rear", self)
+        button_rear.clicked.connect(lambda: app.viewer._display.View_Rear())
+        bottom_buttons.layout().addWidget(button_rear)
+
+
 
         self.tabs = QtWidgets.QTabWidget()
+        self.tabs.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                QtWidgets.QSizePolicy.Minimum)
         self.splitter.addWidget(self.tabs)
 
         self.wall_parameters = ControllerTab()
@@ -253,9 +311,20 @@ class BYOWApp(QtWidgets.QApplication):
                       }
                       }
 
+        self.wall_shape = None
+        self.bb_shape = None
+        self.valid = False
+
         self.viewer = Viewer3d()
         self.window = MainWindow()
         self.setActiveWindow(self.window)
+
+    def calc(self):
+        self.wall_shape = climbing_wall(**self.wall)
+        wall_compound = make_compound(self.wall_shape)
+        bb = get_boundingbox(wall_compound, use_mesh=False)
+        self.bb_shape = get_boundingbox_shape(bb)
+        self.valid = True
 
     @property
     def wall(self):
@@ -264,7 +333,7 @@ class BYOWApp(QtWidgets.QApplication):
     @wall.setter
     def wall(self, value):
         if value != self._wall:
-            self.viewer.needs_redraw = True
+            self.valid = False
         self._wall = value
 
     def run(self):
