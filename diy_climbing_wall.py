@@ -52,7 +52,7 @@ def climbing_wall(wall_width=2000.,
     parts = []
 
     # create horizontal bar on the left side
-    l = back_section[0] + (wall_height + gap) * sina + safety
+    l = back_section[0] + front_section[0] + (wall_height + gap) * sina + safety
     horizontal_left = Bar(pos=[0, 0, 0],
                           ori=[0, 0, -90],
                           length=l,
