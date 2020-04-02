@@ -11,7 +11,7 @@ from OCC.Core.Addons import text_to_brep, Font_FontAspect_Bold
 from OCC.Core.TopExp import TopExp_Explorer
 from OCC.Core.TopAbs import TopAbs_EDGE
 
-from math import radians, floor
+from math import radians
 
 
 def euler_to_gp_trsf(euler_zxz=None, unit="deg"):
@@ -99,7 +99,7 @@ def get_boundingbox_shape(bb):
         builder.Add(compound, anEdge)
         anEdgeExplorer.Next()
 
-    dx_string = text_to_brep(str(floor(bb['dx'])) + " mm", "Arial", Font_FontAspect_Bold, 120., True)
+    dx_string = text_to_brep(str(round(bb['dx'])) + " mm", "Arial", Font_FontAspect_Bold, 120., True)
     transformation = gp_Trsf()
     transformation.SetTranslation(gp_Vec(bb['xmin'] + 120, bb['ymin'] - 120, 0))
     brep_trns = BRepBuilderAPI_Transform(dx_string, transformation, False)
@@ -107,7 +107,7 @@ def get_boundingbox_shape(bb):
     dx_string = brep_trns.Shape()
     builder.Add(compound, dx_string)
 
-    dy_string = text_to_brep(str(floor(bb['dy'])) + " mm", "Arial", Font_FontAspect_Bold, 120., True)
+    dy_string = text_to_brep(str(round(bb['dy'])) + " mm", "Arial", Font_FontAspect_Bold, 120., True)
     t1 = gp_Trsf()
     z = gp_Ax1(gp_Pnt(), gp_Dir(0, 0, 1))
     t1.SetRotation(z, radians(90))
@@ -118,7 +118,7 @@ def get_boundingbox_shape(bb):
     dy_string = brep_trns.Shape()
     builder.Add(compound, dy_string)
 
-    dz_string = text_to_brep(str(floor(bb['dz'])) + " mm", "Arial", Font_FontAspect_Bold, 120., True)
+    dz_string = text_to_brep(str(round(bb['dz'])) + " mm", "Arial", Font_FontAspect_Bold, 120., True)
     x = gp_Ax1(gp_Pnt(), gp_Dir(1, 0, 0))
     y = gp_Ax1(gp_Pnt(), gp_Dir(0, 1, 0))
     z = gp_Ax1(gp_Pnt(), gp_Dir(0, 0, 1))

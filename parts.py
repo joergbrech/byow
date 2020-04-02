@@ -6,7 +6,7 @@ from OCC.Core.BRepFeat import BRepFeat_MakeCylindricalHole
 from OCC.Core.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Vec, gp_Pln
 
 from abc import ABC, abstractmethod
-from math import radians, sin, cos
+from math import radians, sin, cos, floor
 
 from util import euler_to_gp_trsf
 
@@ -42,6 +42,12 @@ class Part(ABC):
 
         self._set_shape()
         self._place()
+
+        self.name = ''
+
+    @abstractmethod
+    def __repr__(self):
+        pass
 
     @abstractmethod
     def _set_shape(self):
@@ -158,6 +164,17 @@ class Bar(Part):
             tool = BRepPrimAPI_MakeHalfSpace(face, pnt_out).Solid()
             self._shape = BRepAlgoAPI_Cut(self._shape, tool).Shape()
 
+    def __repr__(self):
+        out = self.name + '\n'
+        out += ('\t' + str(round(self._length)) + ' x '
+                + str(round(self._section[0])) + ' x '
+                + str(round(self._section[1])) + ' mm' + '\n')
+        if self._saw_start:
+            out += '\t' + 'left end miter angle : ' + str(self._saw_start) + ' deg\n'
+        if self._saw_end:
+            out += '\t' + 'right end miter angle: ' + str(self._saw_end) + ' deg\n'
+        return out
+
 
 class Panel(Part):
 
@@ -180,6 +197,21 @@ class Panel(Part):
         self._thickness = thickness
         self._holes = holes
         super().__init__(pos, ori, parent)
+
+    def __repr__(self):
+        out = self.name + '\n'
+        out += ('\t' + str(round(self._width)) + ' x '
+                + str(round(self._height)) + ' mm' + '\n')
+        out += '\tHole diameter          : ' + str(round(self._holes['diameter'])) + ' mm\n'
+        out += '\tHole horizontal start  : ' + str(round(self._holes['x_start'])) + ' mm\n'
+        out += '\tHole vertical start    : ' + str(round(self._holes['y_start'])) + ' mm\n'
+        out += '\thorizontal hole spacing: ' + str(round(self._holes['x_dist'])) + ' mm\n'
+        out += '\tvertical hole spacing  : ' + str(round(self._holes['y_dist'])) + ' mm\n'
+
+        n_holes_x = floor((self._width-self._holes['x_start'])/self._holes['x_dist'])+1
+        n_holes_y = floor((self._height - self._holes['y_start']) / self._holes['y_dist'])+1
+        out += '\t number of holes        : ' + str(n_holes_x*n_holes_y) + '\n'
+        return out
 
     def _set_shape(self):
         self._shape = BRepPrimAPI_MakeBox(self._height, self._width, self._thickness).Shape()

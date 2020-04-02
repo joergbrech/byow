@@ -59,6 +59,7 @@ def climbing_wall(wall_width=2000.,
                           ori=[0, 0, -90],
                           length=l,
                           section=back_section)
+    horizontal_left.name = "horizontal, left"
     parts.append(horizontal_left)
 
     # create horizontal bar on the right side
@@ -66,6 +67,7 @@ def climbing_wall(wall_width=2000.,
                            parent=horizontal_left,
                            length=l,
                            section=back_section)
+    horizontal_right.name = "horizontal, right"
     parts.append(horizontal_right)
 
     # create horizontal part in the lower back
@@ -74,6 +76,7 @@ def climbing_wall(wall_width=2000.,
                parent=horizontal_left,
                length=wall_width + 2*horizontal_left._section[0],
                section=back_section)
+    back.name = "back bar"
     parts.append(back)
 
 
@@ -91,17 +94,20 @@ def climbing_wall(wall_width=2000.,
         'saw_end': 90-wall_angle
     }
     diag1 = Bar(**kwargs)
+    diag1.name = "diagonal bar 1"
     parts.append(diag1)
 
     kwargs['pos'] = [0, (wall_width - horizontal_left._section[1])/2, 0]
     kwargs['ori'] = [0, 0, 0]
     kwargs['parent'] = diag1
     diag2 = Bar(**kwargs)
+    diag2.name = "diagonal bar 2"
     parts.append(diag2)
 
     kwargs['pos'] = [0, (wall_width - horizontal_left._section[1])/2, 0]
     kwargs['parent'] = diag2
     diag3 = Bar(**kwargs)
+    diag3.name = "diagonal bar 3"
     parts.append(diag3)
 
     # add the climbing panels
@@ -111,15 +117,17 @@ def climbing_wall(wall_width=2000.,
                      height=wall_height/2,
                      thickness=wall_thickness,
                      holes=holes)
+    panel_lo.name = "lower plywood panel"
     parts.append(panel_lo)
 
-    panel_lo = Panel(pos=[panel_lo._height, 0, 0],
+    panel_hi = Panel(pos=[panel_lo._height, 0, 0],
                      parent=panel_lo,
                      width=wall_width,
                      height=wall_height / 2,
                      thickness=wall_thickness,
                      holes=holes)
-    parts.append(panel_lo)
+    panel_hi.name = "upper plywood panel"
+    parts.append(panel_hi)
 
     # add vertical bars
     dx = 2 * back_section[0] + (wall_height + gap) * sina - front_section[0]
@@ -130,6 +138,7 @@ def climbing_wall(wall_width=2000.,
                         length=l,
                         parent=horizontal_left,
                         section=front_section)
+    vertical_left.name = "left vertical bar"
     parts.append(vertical_left)
 
     vertical_right = Bar(pos=[dx, 0, dz],
@@ -137,6 +146,7 @@ def climbing_wall(wall_width=2000.,
                          length=l,
                          parent=horizontal_right,
                          section=front_section)
+    vertical_right.name = "right vertical bar"
     parts.append(vertical_right)
 
     dx = back_section[1] + front_section[0] + (wall_height + gap) * cosa
@@ -145,6 +155,7 @@ def climbing_wall(wall_width=2000.,
               length=wall_width + 2*back_section[0],
               parent=vertical_left,
               section=front_section)
+    top.name = "top bar"
     parts.append(top)
 
     return parts
@@ -169,6 +180,9 @@ if __name__ == '__main__':
 
     parts = climbing_wall(**wall)
 
+    for part in parts:
+        print(part)
+
     wall_compound = make_compound(parts)
     bb = get_boundingbox(wall_compound, use_mesh=False)
     bb_box = get_boundingbox_shape(bb)
@@ -186,6 +200,6 @@ if __name__ == '__main__':
     #   mount_lower = [side, top] (default for wall_angle >= 45: side, default for wall_angle < 45: top)
     #   overlap_upper = [+, -] (- means away from climber, - is default)
     #   overlap_lower = [+, -] (- means away from climber, - is default)
-    # pretty print needed material (e.g. 2x plywood 1200x1000x21, 8x bars 2000x ... )
+    # support pretty print in gui
     # export to step, stl
     # make conda package
