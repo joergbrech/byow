@@ -5,6 +5,8 @@ from OCC.Display.SimpleGui import init_display
 from math import radians, sin, cos, tan
 from parts import Bar, Panel
 
+from util import get_boundingbox, get_boundingbox_shape, make_compound
+
 
 def climbing_wall(wall_width=2000.,
                   wall_height=2400.,
@@ -167,9 +169,14 @@ if __name__ == '__main__':
 
     parts = climbing_wall(**wall)
 
+    wall_compound = make_compound(parts)
+    bb = get_boundingbox(wall_compound, use_mesh=False)
+    bb_box = get_boundingbox_shape(bb)
+
     display, start_display, add_menu, add_function_to_menu = init_display()
     for part in parts:
         display.DisplayShape(part._shape, update=False)
+    display.DisplayShape(bb_box, color='red', update=False)
     display.FitAll()
     start_display()
 
