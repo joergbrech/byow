@@ -5,8 +5,9 @@ channels:
 dependencies:
   - python=3.6
   - pip
-  - conda-build
   - pythonocc-core
   - pyqt
   - qtpy
   - qdarkstyle
+  - conda-build
+  - anaconda-client

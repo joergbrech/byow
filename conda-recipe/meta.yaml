@@ -7,11 +7,11 @@ source:
 
 requirements:
   build:
-    - python
+    - python={{ python_version }}
     - setuptools
 
   run:
-    - python
+    - python={{ python_version }}
     - pythonocc-core
     - pyqt
     - qtpy
