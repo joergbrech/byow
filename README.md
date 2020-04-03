@@ -23,7 +23,7 @@ byow
 into your anaconda command prompt/shell to start the climbing wall configurator. Choose your parameters and build your wall.
 For another wall configuration you need to modify the code.
 
-## Whouldn't it have been easier to use *any* CAD system directly?
+## Wouldn't it have been easier to use *any* CAD system directly?
 
 :fu: I was bored, ok?
 
