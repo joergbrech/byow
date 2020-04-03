@@ -1,0 +1,21 @@
+package:
+  name: byow
+  version: 0.0.1
+
+source:
+  path: ../
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python
+    - pythonocc-core
+    - pyqt
+    - qtpy
+    - qdarkstyle
+
+about:
+  home: https://github.com/joergbrech/climbing-wall

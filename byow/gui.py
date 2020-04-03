@@ -3,7 +3,7 @@ from math import floor, ceil
 
 import qdarkstyle
 
-from diy_climbing_wall import climbing_wall
+from byow.diy_climbing_wall import climbing_wall
 
 from OCC.Display.backend import load_any_qt_backend, get_qt_modules
 
@@ -11,7 +11,7 @@ load_any_qt_backend()
 QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
 from OCC.Display.qtDisplay import qtViewer3d
 
-from util import make_compound, get_boundingbox_shape, get_boundingbox
+from byow.util import make_compound, get_boundingbox_shape, get_boundingbox
 
 class Controller(QtWidgets.QFrame):
 

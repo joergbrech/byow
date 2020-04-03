@@ -3,9 +3,9 @@
 
 from OCC.Display.SimpleGui import init_display
 from math import radians, sin, cos, tan
-from parts import Bar, Panel
+from byow.parts import Bar, Panel
 
-from util import get_boundingbox, get_boundingbox_shape, make_compound
+from byow.util import get_boundingbox, get_boundingbox_shape, make_compound
 
 
 def climbing_wall(wall_width=2000.,

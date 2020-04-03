@@ -8,7 +8,7 @@ from OCC.Core.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Vec, gp_Pln
 from abc import ABC, abstractmethod
 from math import radians, sin, cos, floor
 
-from util import euler_to_gp_trsf
+from byow.util import euler_to_gp_trsf
 
 
 class Part(ABC):
