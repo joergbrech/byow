@@ -4,15 +4,22 @@
 
 I don't know how to build climbing walls or hold a saw. If you build this and hurt yourself, that's on you.
 
-## Usage
+## Installation
 
 Install [Anaconda](https://docs.conda.io/en/latest/miniconda.html) and type
 
 ```buildoutcfg
-conda env create -f environment.yml
-conda activate climbing-wall
-python gui.py
+conda install byow -c joergbrech
 ```
+
+## Usage
+
+Enter
+```buildoutcfg
+byow
+```
+to start the climbing wall configurator. Choose your parameters and build your wall.
+For another wall configuration you need to modify the code.
 
 ## Whouldn't it have been easier to use *any* CAD system directly?
 

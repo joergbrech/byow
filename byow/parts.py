@@ -165,14 +165,15 @@ class Bar(Part):
             self._shape = BRepAlgoAPI_Cut(self._shape, tool).Shape()
 
     def __repr__(self):
-        out = self.name + '\n'
-        out += ('\t' + str(round(self._length)) + ' x '
+        out = self.name + ': '
+        out += (str(round(self._length)) + ' x '
                 + str(round(self._section[0])) + ' x '
                 + str(round(self._section[1])) + ' mm' + '\n')
         if self._saw_start:
             out += '\t' + 'left end miter angle : ' + str(self._saw_start) + ' deg\n'
         if self._saw_end:
             out += '\t' + 'right end miter angle: ' + str(self._saw_end) + ' deg\n'
+        out += '\n'
         return out
 
 
@@ -199,8 +200,8 @@ class Panel(Part):
         super().__init__(pos, ori, parent)
 
     def __repr__(self):
-        out = self.name + '\n'
-        out += ('\t' + str(round(self._width)) + ' x '
+        out = self.name + ': '
+        out += (str(round(self._width)) + ' x '
                 + str(round(self._height)) + ' mm' + '\n')
         out += '\tHole diameter          : ' + str(round(self._holes['diameter'])) + ' mm\n'
         out += '\tHole horizontal start  : ' + str(round(self._holes['x_start'])) + ' mm\n'
@@ -210,7 +211,8 @@ class Panel(Part):
 
         n_holes_x = floor((self._width-self._holes['x_start'])/self._holes['x_dist'])+1
         n_holes_y = floor((self._height - self._holes['y_start']) / self._holes['y_dist'])+1
-        out += '\t number of holes        : ' + str(n_holes_x*n_holes_y) + '\n'
+        out += '\tRequired drive-in nuts : ' + str(n_holes_x*n_holes_y) + '\n'
+        out += '\n'
         return out
 
     def _set_shape(self):

@@ -1,17 +1,17 @@
 import sys
 from math import floor, ceil
-
 import qdarkstyle
-
-from byow.diy_climbing_wall import climbing_wall
+from byow.climbing_wall import climbing_wall
+from byow.parts import Bar, Panel
 
 from OCC.Display.backend import load_any_qt_backend, get_qt_modules
 
 load_any_qt_backend()
 QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
-from OCC.Display.qtDisplay import qtViewer3d
 
+from OCC.Display.qtDisplay import qtViewer3d
 from byow.util import make_compound, get_boundingbox_shape, get_boundingbox
+
 
 class Controller(QtWidgets.QFrame):
 
@@ -141,8 +141,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.setAcceptDrops(True)
 
+        # shopping list menu item
+        list_action = QtWidgets.QAction("&Shopping List", self)
+        list_action.setShortcut("Ctrl+P")
+        list_action.setStatusTip('Get verbose info on space and material requirements')
+        list_action.triggered.connect(self.shopping_list)
+
+        self.shopping_list_dialog = QtWidgets.QDialog()
+        self.shopping_list_dialog.setWindowTitle("Shopping List")
+        self.shopping_list_dialog.setGeometry(300, 300, 400, 800)
+        self.shopping_list_text = QtWidgets.QTextEdit()
+        self.shopping_list_dialog.setLayout(QtWidgets.QVBoxLayout())
+        self.shopping_list_dialog.layout().addWidget(self.shopping_list_text, stretch=1)
+
+        self.menu_bar = self.menuBar()
+        self.menu_bar.addAction(list_action)
+
+        # central frame
         self.frame = QtWidgets.QFrame()
         self.setCentralWidget(self.frame)
 
@@ -196,8 +212,6 @@ class MainWindow(QtWidgets.QMainWindow):
         button_rear = QtWidgets.QPushButton("Rear", self)
         button_rear.clicked.connect(lambda: app.viewer._display.View_Rear())
         bottom_buttons.layout().addWidget(button_rear)
-
-
 
         self.tabs = QtWidgets.QTabWidget()
         self.tabs.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
@@ -288,6 +302,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.showMaximized()
 
+    def shopping_list(self):
+        app = QtWidgets.QApplication.instance()
+        self.shopping_list_text.setText(app.wall_to_str())
+        self.shopping_list_dialog.show()
+        self.shopping_list_dialog.exec_()
+
 
 class BYOWApp(QtWidgets.QApplication):
 
@@ -311,7 +331,9 @@ class BYOWApp(QtWidgets.QApplication):
                       }
                       }
 
+        self.parts = None
         self.wall_shape = None
+        self.bb_dict = None
         self.bb_shape = None
         self.valid = False
 
@@ -322,9 +344,25 @@ class BYOWApp(QtWidgets.QApplication):
     def calc(self):
         self.wall_shape = climbing_wall(**self.wall)
         wall_compound = make_compound(self.wall_shape)
-        bb = get_boundingbox(wall_compound, use_mesh=False)
-        self.bb_shape = get_boundingbox_shape(bb)
+        self.bb_dict = get_boundingbox(wall_compound, use_mesh=False)
+        self.bb_shape = get_boundingbox_shape(self.bb_dict)
         self.valid = True
+
+    def wall_to_str(self):
+        out = ""
+        out += "\n\n # Required Space\n\n"
+        out += " width  = " + str(round(self.bb_dict['dx'])) + " mm\n"
+        out += " depth  = " + str(round(self.bb_dict['dy'])) + " mm\n"
+        out += " height = " + str(round(self.bb_dict['dz'])) + " mm\n"
+        out += "\n\n\n# Plywood Panels\n\n"
+        for part in self.wall_shape:
+            if type(part) == Panel:
+                out += str(part)
+        out += "\n\n# Bars\n\n"
+        for part in self.wall_shape:
+            if type(part) == Bar:
+                out += str(part)
+        return out
 
     @property
     def wall(self):

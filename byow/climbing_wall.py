@@ -181,7 +181,11 @@ if __name__ == '__main__':
     parts = climbing_wall(**wall)
 
     for part in parts:
-        print(part)
+        if type(part) == Panel:
+            print(part)
+    for part in parts:
+        if type(part) == Bar:
+            print(part)
 
     wall_compound = make_compound(parts)
     bb = get_boundingbox(wall_compound, use_mesh=False)
@@ -198,8 +202,6 @@ if __name__ == '__main__':
     # add options for diagonal bar mount
     #   mount_upper = [side, bottom] (default for wall_angle >= 45: side, default for wall_angle < 45: bottom)
     #   mount_lower = [side, top] (default for wall_angle >= 45: side, default for wall_angle < 45: top)
-    #   overlap_upper = [+, -] (- means away from climber, - is default)
-    #   overlap_lower = [+, -] (- means away from climber, - is default)
     # support pretty print in gui
     # export to step, stl
-    # make conda package
+    # make conda package with github actions
