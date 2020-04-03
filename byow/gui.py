@@ -10,7 +10,8 @@ load_any_qt_backend()
 QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
 
 from OCC.Display.qtDisplay import qtViewer3d
-from byow.util import make_compound, get_boundingbox_shape, get_boundingbox
+
+from byow.util import make_compound, get_boundingbox_shape, get_boundingbox, export_to_step
 
 
 class Controller(QtWidgets.QFrame):
@@ -148,6 +149,12 @@ class MainWindow(QtWidgets.QMainWindow):
         list_action.setStatusTip('Get verbose info on space and material requirements')
         list_action.triggered.connect(self.shopping_list)
 
+        # step export
+        export_action = QtWidgets.QAction("&Export to STEP", self)
+        export_action.setShortcut("Ctrl+S")
+        export_action.setStatusTip('Export to STEP file')
+        export_action.triggered.connect(self.file_save)
+
         self.shopping_list_dialog = QtWidgets.QDialog()
         self.shopping_list_dialog.setWindowTitle("Shopping List")
         self.shopping_list_dialog.setGeometry(300, 300, 400, 800)
@@ -156,6 +163,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.shopping_list_dialog.layout().addWidget(self.shopping_list_text, stretch=1)
 
         self.menu_bar = self.menuBar()
+        self.menu_bar.addAction(export_action)
         self.menu_bar.addAction(list_action)
 
         # central frame
@@ -301,6 +309,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.panel_parameters.append(self.y_dist_controller)
 
         self.showMaximized()
+
+    def file_save(self):
+        dialog = QtWidgets.QFileDialog()
+        dialog.setFilter(dialog.filter() | QtCore.QDir.Hidden)
+        dialog.setDefaultSuffix('stp')
+        dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
+        dialog.setNameFilters(['STEP (*.stp)'])
+        if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            app = QtWidgets.QApplication.instance()
+            export_to_step(dialog.selectedFiles()[0], app.wall_shape)
 
     def shopping_list(self):
         app = QtWidgets.QApplication.instance()

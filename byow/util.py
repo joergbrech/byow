@@ -10,6 +10,9 @@ from OCC.Core.BRepBuilderAPI import BRepBuilderAPI_Transform
 from OCC.Core.Addons import text_to_brep, Font_FontAspect_Bold
 from OCC.Core.TopExp import TopExp_Explorer
 from OCC.Core.TopAbs import TopAbs_EDGE
+from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
+from OCC.Core.Interface import Interface_Static_SetCVal
+from OCC.Core.IFSelect import IFSelect_RetDone
 
 from math import radians
 
@@ -145,3 +148,14 @@ def make_compound(parts):
     for part in parts:
         builder.Add(compound, part._shape)
     return compound
+
+
+def export_to_step(filename, parts):
+    compound = make_compound(parts)
+    step_writer = STEPControl_Writer()
+    Interface_Static_SetCVal("write.step.schema", "AP203")
+    step_writer.Transfer(compound, STEPControl_AsIs)
+    status = step_writer.Write(filename)
+
+    if status != IFSelect_RetDone:
+        raise AssertionError("load failed")
