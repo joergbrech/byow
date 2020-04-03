@@ -342,12 +342,10 @@ class BYOWApp(QtWidgets.QApplication):
 
 def gui():
     # start app and open main window
-    BYOWApp(sys.argv).run()
-
-
-if __name__ == '__main__':
-
-    # start app and open main window
     app = BYOWApp(sys.argv)
     app.viewer.trigger_redraw()
     app.run()
+
+
+if __name__ == '__main__':
+    gui()
