@@ -50,19 +50,19 @@ jobs:
     - name: Copy builds (ubuntu)
       run: |
         mkdir -p build
-        cp /usr/share/miniconda/envs/climbing-wall/conda-bld/linux-64/*.tar.bz2 build/
+        cp /usr/share/miniconda/conda-bld/linux-64/*.tar.bz2 build/
       if: contains(matrix.os, 'ubuntu')
       
     - name: Copy builds (macos)
       run: |
         mkdir -p build
-        cp /usr/local/miniconda/envs/climbing-wall/conda-bld/osx-64/*.tar.bz2 build/
+        cp /usr/share/miniconda/conda-bld/osx-64/*.tar.bz2 build/
       if: contains(matrix.os, 'macos')
     
     - name: Copy builds (windows)
       run: |
         if not exist "build" mkdir build
-        Copy C:\Miniconda\envs\climbing-wall\conda-bld\win-64\*.tar.bz2 build
+        Copy C:\Miniconda\conda-bld\win-64\*.tar.bz2 build
       shell: cmd
       if: contains(matrix.os, 'windows')
       
