@@ -132,37 +132,39 @@ class Bar(Part):
                                           self._section[1]).Shape()
 
         if self._saw_start is not None:
-            ra = radians(self._saw_start)
-            sina = sin(ra)
-            cosa = cos(ra)
-            if ra > 0:
-                pnt = gp_Pnt(0, 0, 0)
-                pln = gp_Pln(pnt, gp_Dir(-sina, 0, cosa))
-                pnt_out = gp_Pnt(0, 0, self._section[1])
-            else:
-                pnt = gp_Pnt(0, 0, self._section[1])
-                pln = gp_Pln(pnt, gp_Dir(sina, 0, -cosa))
-                pnt_out = gp_Pnt(0, 0, 0)
-            face = BRepBuilderAPI_MakeFace(pln).Shape()
-            tool = BRepPrimAPI_MakeHalfSpace(face, pnt_out).Solid()
-            self._shape = BRepAlgoAPI_Cut(self._shape, tool).Shape()
+            if 1e-6 < self._saw_start < 90-1e-6:
+                ra = radians(self._saw_start)
+                sina = sin(ra)
+                cosa = cos(ra)
+                if ra > 0:
+                    pnt = gp_Pnt(0, 0, 0)
+                    pln = gp_Pln(pnt, gp_Dir(-sina, 0, cosa))
+                    pnt_out = gp_Pnt(0, 0, self._section[1])
+                else:
+                    pnt = gp_Pnt(0, 0, self._section[1])
+                    pln = gp_Pln(pnt, gp_Dir(sina, 0, -cosa))
+                    pnt_out = gp_Pnt(0, 0, 0)
+                face = BRepBuilderAPI_MakeFace(pln).Shape()
+                tool = BRepPrimAPI_MakeHalfSpace(face, pnt_out).Solid()
+                self._shape = BRepAlgoAPI_Cut(self._shape, tool).Shape()
 
         if self._saw_end is not None:
-            ra = radians(self._saw_end)
-            sina = sin(ra)
-            cosa = cos(ra)
-            if ra > 0:
-                pnt = gp_Pnt(self._length, 0, 0)
-                pln = gp_Pln(pnt, gp_Dir(sina, 0, cosa))
-                pnt_out = gp_Pnt(self._length, 0, self._section[1])
-            else:
-                pnt = gp_Pnt(self._length, 0, self._section[1])
-                pln = gp_Pln(pnt, gp_Dir(-sina, 0, -cosa))
-                pnt_out = gp_Pnt(self._length, 0, 0)
+            if 1e-6 < self._saw_end < 90-1e-6:
+                ra = radians(self._saw_end)
+                sina = sin(ra)
+                cosa = cos(ra)
+                if ra > 0:
+                    pnt = gp_Pnt(self._length, 0, 0)
+                    pln = gp_Pln(pnt, gp_Dir(sina, 0, cosa))
+                    pnt_out = gp_Pnt(self._length, 0, self._section[1])
+                else:
+                    pnt = gp_Pnt(self._length, 0, self._section[1])
+                    pln = gp_Pln(pnt, gp_Dir(-sina, 0, -cosa))
+                    pnt_out = gp_Pnt(self._length, 0, 0)
 
-            face = BRepBuilderAPI_MakeFace(pln).Shape()
-            tool = BRepPrimAPI_MakeHalfSpace(face, pnt_out).Solid()
-            self._shape = BRepAlgoAPI_Cut(self._shape, tool).Shape()
+                face = BRepBuilderAPI_MakeFace(pln).Shape()
+                tool = BRepPrimAPI_MakeHalfSpace(face, pnt_out).Solid()
+                self._shape = BRepAlgoAPI_Cut(self._shape, tool).Shape()
 
     def __repr__(self):
         out = '# ' + self.name + '\n'
