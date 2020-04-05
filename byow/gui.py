@@ -369,13 +369,13 @@ class BYOWApp(QtWidgets.QApplication):
     def wall_to_str(self):
         out = ""
         out += "# Wall parameters\n\n"
-        out += " angle       : " + str(round(self._wall["wall_angle"])) + " deg\n"
-        out += " gap         : " + str(round(self._wall["gap"])) + " mm\n"
-        out += " foot length : " + str(round(self._wall["safety"])) + " mm\n\n"
-        out += " width       : " + str(round(self._wall["wall_width"])) + " mm\n"
-        out += " height      : " + str(round(self._wall["wall_height"])) + " mm\n"
+        out += " - angle: " + str(round(self._wall["wall_angle"])) + " deg\n"
+        out += " - gap: " + str(round(self._wall["gap"])) + " mm\n"
+        out += " - foot length: " + str(round(self._wall["safety"])) + " mm\n\n"
+        out += " - width: " + str(round(self._wall["wall_width"])) + " mm\n"
+        out += " - height: " + str(round(self._wall["wall_height"])) + " mm\n"
         area = self._wall["wall_height"]*self._wall["wall_width"]*1e-6
-        out += " area        : " + "{:.2f}".format(area) + " qm\n\n"
+        out += " - area: " + "{:.2f}".format(area) + " qm\n\n"
 
         # another dirty hack: recalculate vertical bar position
         sina = sin(radians(self._wall['wall_angle']))
@@ -387,20 +387,20 @@ class BYOWApp(QtWidgets.QApplication):
             if part.name == 'back bar':
                 back_section = part._section[0]
         pos = back_section + (wall_height + gap) * sina - front_section
-        out += " vertical bar position : " + str(round(pos)) + " mm\n"
+        out += " - vertical bar position : " + str(round(pos)) + " mm\n"
 
-        out += "\n # Required Space\n\n"
-        out += " width  = " + str(round(self.bb_dict['dx'])) + " mm\n"
-        out += " depth  = " + str(round(self.bb_dict['dy'])) + " mm\n"
-        out += " height = " + str(round(self.bb_dict['dz'])) + " mm\n"
-        out += "\n\n\n# Plywood Panels\n\n"
+        out += "\n ## Required Space\n\n"
+        out += " - width  = " + str(round(self.bb_dict['dx'])) + " mm\n"
+        out += " - depth  = " + str(round(self.bb_dict['dy'])) + " mm\n"
+        out += " - height = " + str(round(self.bb_dict['dz'])) + " mm\n"
+        out += "\n\n## Plywood Panels\n\n"
         for part in self.wall_shape:
             if type(part) == Panel:
-                out += str(part)
-        out += "\n\n# Bars\n\n"
+                out += '##' + str(part)
+        out += "\n\n## Bars\n\n"
         for part in self.wall_shape:
             if type(part) == Bar:
-                out += str(part)
+                out += '##' + str(part)
         return out
 
     @property
