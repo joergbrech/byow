@@ -46,6 +46,8 @@ class Controller(QtWidgets.QFrame):
 
         self.spinbox.editingFinished.connect(app.viewer.trigger_redraw)
         self.dial.sliderReleased.connect(app.viewer.trigger_redraw)
+        self.spinbox.editingFinished.connect(app.shopping_list)
+        self.dial.sliderReleased.connect(app.shopping_list)
 
         # set size policies and style
         self.dial.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
@@ -143,28 +145,14 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-        # shopping list menu item
-        list_action = QtWidgets.QAction("&Shopping List", self)
-        list_action.setShortcut("Ctrl+P")
-        list_action.setStatusTip('Get verbose info on space and material requirements')
-        list_action.triggered.connect(self.shopping_list)
-
         # step export
         export_action = QtWidgets.QAction("&Export to STEP", self)
         export_action.setShortcut("Ctrl+S")
         export_action.setStatusTip('Export to STEP file')
         export_action.triggered.connect(self.file_save)
 
-        self.shopping_list_dialog = QtWidgets.QDialog()
-        self.shopping_list_dialog.setWindowTitle("Shopping List")
-        self.shopping_list_dialog.setGeometry(300, 300, 400, 800)
-        self.shopping_list_text = QtWidgets.QTextEdit()
-        self.shopping_list_dialog.setLayout(QtWidgets.QVBoxLayout())
-        self.shopping_list_dialog.layout().addWidget(self.shopping_list_text, stretch=1)
-
         self.menu_bar = self.menuBar()
         self.menu_bar.addAction(export_action)
-        self.menu_bar.addAction(list_action)
 
         # central frame
         self.frame = QtWidgets.QFrame()
@@ -178,20 +166,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.layout.addWidget(self.splitter)
 
+        # on the left of the main splitter are the shopping list,
+        # 3d buttons and the 3d View
         left = QtWidgets.QFrame()
         left.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                            QtWidgets.QSizePolicy.Expanding)
         self.splitter.addWidget(left)
         left.setLayout(QtWidgets.QVBoxLayout())
 
+        # the shopping list and the 3D view are on top in the vertical
+        # layout in a horizontal splitter
+        splitter_inner = QtWidgets.QSplitter(left)
+        splitter_inner.setOrientation(QtCore.Qt.Horizontal)
+        splitter_inner.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                                     QtWidgets.QSizePolicy.Expanding)
+        left.layout().addWidget(splitter_inner)
+
+        self.shopping_list_text = QtWidgets.QTextEdit()
+        splitter_inner.addWidget(self.shopping_list_text)
+
         app = QtWidgets.QApplication.instance()
-        left.layout().addWidget(app.viewer)
+        splitter_inner.addWidget(app.viewer)
         app.viewer.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                  QtWidgets.QSizePolicy.Expanding)
+        splitter_inner.setSizes([200, 600])
 
+        # below the left inner splitter are the 3D view buttons
         bottom_buttons = QtWidgets.QFrame()
         left.layout().addWidget(bottom_buttons)
         bottom_buttons.setLayout(QtWidgets.QHBoxLayout())
+        bottom_buttons.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                     QtWidgets.QSizePolicy.Minimum)
 
         button_fit = QtWidgets.QPushButton("Fit All", self)
         button_fit.clicked.connect(lambda: app.viewer._display.FitAll())
@@ -308,6 +313,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                             1000)
         self.panel_parameters.append(self.y_dist_controller)
 
+        self.splitter.setSizes([1200, 100])
         self.showMaximized()
 
     def file_save(self):
@@ -319,12 +325,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
             app = QtWidgets.QApplication.instance()
             export_to_step(dialog.selectedFiles()[0], app.wall_shape)
-
-    def shopping_list(self):
-        app = QtWidgets.QApplication.instance()
-        self.shopping_list_text.setText(app.wall_to_str())
-        self.shopping_list_dialog.show()
-        self.shopping_list_dialog.exec_()
 
 
 class BYOWApp(QtWidgets.QApplication):
@@ -403,6 +403,9 @@ class BYOWApp(QtWidgets.QApplication):
                 out += '##' + str(part)
         return out
 
+    def shopping_list(self):
+        self.window.shopping_list_text.setText(self.wall_to_str())
+
     @property
     def wall(self):
         return self._wall
@@ -421,6 +424,7 @@ def gui():
     # start app and open main window
     app = BYOWApp(sys.argv)
     app.viewer.trigger_redraw()
+    app.shopping_list()
     app.run()
 
 
