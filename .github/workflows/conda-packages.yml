@@ -36,24 +36,16 @@ jobs:
       run: sudo chown -R $USER $CONDA
       if: contains(matrix.os, 'macos')
     
-    - name: Install dependencies into Miniconda environment
+    - name: update conda, install conda-build and anaconda-client
       run: |
         conda update -q conda
-        conda create -n climbing-wall conda-build anaconda-client
+        conda install conda-build anaconda-client
         conda info -a
-        conda list -n climbing-wall
+        conda list -n base
         
-    - name: Build BYOW (ubuntu, macos)
+    - name: build BYOW package
       run: |
-        source activate climbing-wall
         conda-build conda-recipe -c joergbrech
-      if: contains(matrix.os, 'ubuntu') || contains(matrix.os, 'macos')
-    - name: Build BYOW (windows)
-      run: |
-        call activate climbing-wall
-        conda-build conda-recipe -c joergbrech
-      shell: cmd
-      if: contains(matrix.os, 'windows')
     
     - name: Copy builds (ubuntu)
       run: |
@@ -74,13 +66,13 @@ jobs:
       shell: cmd
       if: contains(matrix.os, 'windows')
       
-    - name: Upload artifact
+    - name: Upload packages as artifact
       uses: actions/upload-artifact@v1.0.0
       with:
         name: conda-package
         path: build
         
-    - name: Publish to anaconda
+    - name: Publish to anaconda (ubuntu, macos)
       run: |
         anaconda login --username joergbrech --password ${{ secrets.ANACONDA_PWD }}
         anaconda upload build/*
