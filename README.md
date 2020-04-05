@@ -4,6 +4,8 @@
 
 I don't know how to build climbing walls or hold a saw. If you build this and hurt yourself, that's on you.
 
+![](docs/images/screenshot.png)
+
 ## Installation
 
 Install [Anaconda](https://docs.conda.io/en/latest/miniconda.html) and type
