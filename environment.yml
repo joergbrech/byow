@@ -1,6 +1,6 @@
 name: climbing-wall
 channels:
-  - dlr-sc
+  - joergbrech
   - conda-forge
 dependencies:
   - python=3.6
@@ -9,5 +9,3 @@ dependencies:
   - pyqt
   - qtpy
   - qdarkstyle
-  - conda-build
-  - anaconda-client
