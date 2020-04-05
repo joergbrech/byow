@@ -16,7 +16,7 @@ def climbing_wall(wall_width=2000.,
                   safety=500.,
                   holes=None):
     """
-    create a free standing climbing wall
+    create a free standing climbing wall.
 
     :param wall_width: the width of the climbable surface
     :param wall_height: the height of the climbable surface
@@ -162,7 +162,7 @@ def climbing_wall(wall_width=2000.,
 
 
 if __name__ == '__main__':
-
+    # just for testing
     wall = {'wall_width': 2000,
             'wall_height': 2400,
             'wall_thickness': 21,
@@ -202,5 +202,4 @@ if __name__ == '__main__':
     # add options for diagonal bar mount
     #   mount_upper = [side, bottom] (default for wall_angle >= 45: side, default for wall_angle < 45: bottom)
     #   mount_lower = [side, top] (default for wall_angle >= 45: side, default for wall_angle < 45: top)
-    # add dlr-sc deps to own channel so that "conda install" does not require extra channels
     # make conda package with github actions for osx, linux and win

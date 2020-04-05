@@ -1,22 +1,41 @@
 import sys
 from math import floor, ceil, sin, radians
+
 import qdarkstyle
+
 from byow.climbing_wall import climbing_wall
 from byow.parts import Bar, Panel
+from byow.util import make_compound, get_boundingbox_shape, get_boundingbox, export_to_step
 
 from OCC.Display.backend import load_any_qt_backend, get_qt_modules
-
 load_any_qt_backend()
 QtCore, QtGui, QtWidgets, QtOpenGL = get_qt_modules()
-
 from OCC.Display.qtDisplay import qtViewer3d
-
-from byow.util import make_compound, get_boundingbox_shape, get_boundingbox, export_to_step
 
 
 class Controller(QtWidgets.QFrame):
+    """
+    A widget consisting of a QLabel, a QDoubleSpinbox and a QDial.
+    The QDoubleSpinbox and QDial modify the same value
+    """
 
     def __init__(self, label_text, unit_text, keys, min, max, *args):
+        """
+        Initializer of the Controller
+
+        :param label_text: The name of the Controller
+        :param unit_text: The unit of measurement for the value
+        :param keys: A list of keys that lead to the value in the wall dict.
+                     This is a list, since the value can be in a nested dict,
+                     e.g. enter [holes, diameter] if this Controller shall
+                     modify wall['holes']['diameter']
+        :param min: Minimum value used for the spinbox/dial
+        :param min: Maximum value used for the spinbox/dial
+        :param *args: Any additional arguments passed to the initializer of
+                      the parent widget
+
+        :return: None
+        """
         super().__init__(*args)
 
         self.dial = QtWidgets.QDial()

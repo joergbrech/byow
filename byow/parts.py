@@ -132,7 +132,7 @@ class Bar(Part):
                                           self._section[1]).Shape()
 
         if self._saw_start is not None:
-            if 1e-6 < self._saw_start < 90-1e-6:
+            if -90+1e-6 < self._saw_start < 90-1e-6:
                 ra = radians(self._saw_start)
                 sina = sin(ra)
                 cosa = cos(ra)
@@ -149,7 +149,7 @@ class Bar(Part):
                 self._shape = BRepAlgoAPI_Cut(self._shape, tool).Shape()
 
         if self._saw_end is not None:
-            if 1e-6 < self._saw_end < 90-1e-6:
+            if -90 + 1e-6 < self._saw_end < 90-1e-6:
                 ra = radians(self._saw_end)
                 sina = sin(ra)
                 cosa = cos(ra)

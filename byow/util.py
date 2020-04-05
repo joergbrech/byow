@@ -85,7 +85,15 @@ def get_boundingbox(shape, tol=1e-6, use_mesh=True):
 
 
 def get_boundingbox_shape(bb):
+    """
+    Given the dict returned by `get_boundingbox`, this
+    function creates a TopoDS_Compound to visualize
+    the bounding box, including annotations
 
+    :param bb: dict returned by `get_boundingbox`
+
+    :return: a TopoDS_Compound to visualize the bounding box
+    """
     compound = TopoDS_Compound()
     builder = BRep_Builder()
     builder.MakeCompound(compound)
@@ -142,6 +150,14 @@ def get_boundingbox_shape(bb):
 
 
 def make_compound(parts):
+    """
+    Takes a list of parts and returns a TopoDS_Compound
+    from the parts' shapes.
+
+    :param parts: A list of Part instances
+
+    :return: a TopoDS_Compound from all of the parts' shapes
+    """
     compound = TopoDS_Compound()
     builder = BRep_Builder()
     builder.MakeCompound(compound)
@@ -151,6 +167,14 @@ def make_compound(parts):
 
 
 def export_to_step(filename, parts):
+    """
+    Export all the parts' shapes to a STEP file
+
+    :param filename: The output STEP file
+    :param parts: a list of Part instances
+
+    :return: None
+    """
     compound = make_compound(parts)
     step_writer = STEPControl_Writer()
     Interface_Static_SetCVal("write.step.schema", "AP203")
