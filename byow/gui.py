@@ -323,8 +323,13 @@ class MainWindow(QtWidgets.QMainWindow):
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dialog.setNameFilters(['STEP (*.stp)'])
         if dialog.exec_() == QtWidgets.QDialog.Accepted:
+            filename_stp = dialog.selectedFiles()[0]
             app = QtWidgets.QApplication.instance()
-            export_to_step(dialog.selectedFiles()[0], app.wall_shape)
+            export_to_step(filename_stp, app.wall_shape)
+
+            filename_md = filename_stp[0:-3] + 'md'
+            with open(filename_md, 'w', encoding='utf-8') as f:
+                f.write(app.wall_to_str())
 
 
 class BYOWApp(QtWidgets.QApplication):
