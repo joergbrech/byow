@@ -202,4 +202,3 @@ if __name__ == '__main__':
     # add options for diagonal bar mount
     #   mount_upper = [side, bottom] (default for wall_angle >= 45: side, default for wall_angle < 45: bottom)
     #   mount_lower = [side, top] (default for wall_angle >= 45: side, default for wall_angle < 45: top)
-    # make conda package with github actions for osx, linux and win

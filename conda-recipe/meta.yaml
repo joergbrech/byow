@@ -19,3 +19,5 @@ requirements:
 
 about:
   home: https://github.com/joergbrech/climbing-wall
+  license: MIT
+  summary: 'Small CAD tool for a free standing DIY climbing wall'
