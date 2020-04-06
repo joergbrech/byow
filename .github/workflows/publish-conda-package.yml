@@ -1,0 +1,59 @@
+
+name: publish-package
+
+on:
+  create:
+    tags:
+      - v*
+
+jobs:
+  
+  conda-bld:
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest,macos-latest,windows-latest]
+      fail-fast: false
+    
+    runs-on: ${{ matrix.os }}    
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup conda
+      uses: s-weigand/setup-conda@v1
+      with:
+        update-conda: true
+      
+    - name: install conda-build and anaconda-client
+      run: |
+        conda install conda-build anaconda-client
+        conda info -a
+        conda list -n base
+        
+    - name: build BYOW package
+      run: conda-build conda-recipe -c joergbrech
+      
+    - name: Copy builds (macos)
+      run: |
+        mkdir -p build
+        cp /usr/local/miniconda/conda-bld/osx-64/*.tar.bz2 build/
+      if: contains(matrix.os, 'macos')
+    
+    - name: Copy builds (windows)
+      run: |
+        if not exist "build" mkdir build
+        Copy C:\Miniconda\conda-bld\win-64\*.tar.bz2 build
+      shell: cmd
+      if: contains(matrix.os, 'windows')
+      
+    - name: Upload packages as artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: conda-package
+        path: build
+        
+    - name: Publish to anaconda
+      run: anaconda login --username joergbrech --password ${{ secrets.ANACONDA_PWD }}
+        anaconda upload build/*
+      
