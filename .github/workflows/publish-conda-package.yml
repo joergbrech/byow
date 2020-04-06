@@ -1,5 +1,4 @@
-
-name: publish-package
+name: Build and publish conda package
 
 on:
   create:
@@ -33,6 +32,12 @@ jobs:
         
     - name: build BYOW package
       run: conda-build conda-recipe -c joergbrech
+    
+    - name: Copy builds (ubuntu)
+      run: |
+        mkdir -p build
+        cp /usr/share/miniconda/conda-bld/linux-64/*.tar.bz2 build/
+      if: contains(matrix.os, 'ubuntu')
       
     - name: Copy builds (macos)
       run: |
@@ -54,6 +59,7 @@ jobs:
         path: build
         
     - name: Publish to anaconda
-      run: anaconda login --username joergbrech --password ${{ secrets.ANACONDA_PWD }}
+      run: |
+        anaconda login --username joergbrech --password ${{ secrets.ANACONDA_PWD }}
         anaconda upload build/*
       
