@@ -361,15 +361,15 @@ class BYOWApp(QtWidgets.QApplication):
         self._wall = {'wall_width': 2000,
                       'wall_height': 2400,
                       'wall_thickness': 21,
-                      'wall_angle': 25,
-                      'gap': 100,
-                      'safety': 500,
+                      'wall_angle': 22,
+                      'gap': 75,
+                      'safety': 733,
                       'holes': {
                           'x_start': 100.,
                           'x_dist': 200.,
                           'y_start': 100.,
                           'y_dist': 200.,
-                          'diameter': 13.
+                          'diameter': 12.
                       }
                       }
 
